@@ -1,0 +1,65 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:padding="16dp" android:background="#FAFAFA">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_title"
+        android:layout_gravity="center"
+        android:textSize="32sp"
+        android:textColor="@color/blue"
+        android:textStyle="bold"
+        android:layout_marginBottom="40dp"/>
+
+    <EditText
+        android:id="@+id/searchInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/searchHint"
+        android:textSize="24sp"/>
+
+    <Button
+        android:id="@+id/searchBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/search"
+        android:background="@drawable/button"
+        android:layout_marginTop="20dp"
+        android:textSize="24sp"
+        android:textAllCaps="false"/>
+
+    <TextView
+        android:id="@+id/apiResult"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/saveBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:visibility="gone"
+        android:background="@drawable/button"
+        android:textSize="24sp"
+        android:textAllCaps="false"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/favoriteBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/favorites"
+        android:background="@drawable/button"
+        android:layout_marginBottom="50dp"
+        android:textSize="24sp"
+        android:textAllCaps="false"/>
+</LinearLayout>

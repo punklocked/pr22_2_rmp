@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">RecipeFinder_Nabrodov</string>
+    <string name="app_title">Поиск рецептов</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="loginBtnText">Войти</string>
+    <string name="searchHint">Ингридиенты (на английском)</string>
+    <string name="search">Поиск</string>
+    <string name="save">Сохранить</string>
+    <string name="favorites">Избранное</string>
+    <string name="clear">Очистить</string>
+</resources>
