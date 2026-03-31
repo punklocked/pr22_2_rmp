@@ -12,8 +12,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.room.Room
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import org.json.JSONArray
 import org.json.JSONObject
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
@@ -30,7 +32,42 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val saveBtn = view.findViewById<Button>(R.id.saveBtn)
         val favoriteBtn = view.findViewById<Button>(R.id.favoriteBtn)
 
+        var lastRecipeId = 0
         var lastRecipeTitle = ""
+        var lastRecipeInstructions = ""
+
+        fun getRecipeInstructions(recipeId: Int, queue: RequestQueue) {
+            val instructionsUrl = "https://api.spoonacular.com/recipes/$recipeId/analyzedInstructions?apiKey=$API_KEY"
+
+            val instructionsRequest = StringRequest(Request.Method.GET, instructionsUrl, { response ->
+                Log.d("DEBUG_INSTRUCTIONS", response)
+
+                val instructionsArray = JSONArray(response)
+                val instructions = StringBuilder()
+
+                if (instructionsArray.length() > 0) {
+                    val steps = instructionsArray.getJSONObject(0).getJSONArray("steps")
+                    for (i in 0 until steps.length()) {
+                        val step = steps.getJSONObject(i)
+                        instructions.append("${step.getInt("number")}. ${step.getString("step")}\n")
+                    }
+                    lastRecipeInstructions = instructions.toString()
+
+                    apiResult.text = "Найдено: $lastRecipeTitle\n\nИнструкция:\n${lastRecipeInstructions.take(200)}..."
+                    saveBtn.visibility = View.VISIBLE
+                } else {
+                    lastRecipeInstructions = "Инструкция не найдена"
+                    apiResult.text = "Найдено: $lastRecipeTitle\n\nИнструкция не доступна"
+                    saveBtn.visibility = View.VISIBLE
+                }
+            }, {
+                lastRecipeInstructions = "Ошибка загрузки инструкции"
+                apiResult.text = "Найдено: $lastRecipeTitle\n\nОшибка загрузки инструкции"
+                saveBtn.visibility = View.VISIBLE
+            })
+
+            queue.add(instructionsRequest)
+        }
 
         searchBtn.setOnClickListener {
             val input = searchInput.text.toString().trim()
@@ -39,7 +76,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 return@setOnClickListener
             }
 
-            val url = "https://api.spoonacular.com/recipes/complexSearch?query=$input&apiKey=$API_KEY&number=1"
+            val url = "https://api.spoonacular.com/recipes/complexSearch?query=$input&apiKey=$API_KEY&number=1&instructionsRequired=true"
 
             val queue = Volley.newRequestQueue(requireContext())
             val request = StringRequest(Request.Method.GET, url, { response ->
@@ -48,9 +85,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 val json = JSONObject(response)
                 val results = json.getJSONArray("results")
                 if (results.length() > 0) {
-                    lastRecipeTitle = results.getJSONObject(0).getString("title")
-                    apiResult.text = "Найдено: $lastRecipeTitle"
-                    saveBtn.visibility = View.VISIBLE
+                    val recipe = results.getJSONObject(0)
+                    lastRecipeId = recipe.getInt("id")
+                    lastRecipeTitle = recipe.getString("title")
+
+                    getRecipeInstructions(lastRecipeId, queue)
                 }
                 else {
                     apiResult.text = "Ничего не найдено"
@@ -65,18 +104,17 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         saveBtn.setOnClickListener {
-            if (lastRecipeTitle.isEmpty()) return@setOnClickListener
+            if (lastRecipeTitle.isEmpty() || lastRecipeInstructions.isEmpty()) return@setOnClickListener
 
             val db = Room.databaseBuilder(requireContext(), AppDatabase::class.java, "recipe_db").build()
 
             Thread {
-
                 val recipeExists = db.recipeDao().getRecipeByTitle(lastRecipeTitle)
 
                 requireActivity().runOnUiThread {
                     if (recipeExists == null) {
                         Thread {
-                            db.recipeDao().insert(Recipe(title = lastRecipeTitle, summary = "Вкусно и полезно"))
+                            db.recipeDao().insert(Recipe(title = lastRecipeTitle, instructions = lastRecipeInstructions))
                             requireActivity().runOnUiThread {
                                 Toast.makeText(requireContext(), "Рецепт добавлен в избранное", Toast.LENGTH_SHORT).show()
                             }

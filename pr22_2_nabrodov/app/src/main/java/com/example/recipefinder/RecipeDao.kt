@@ -5,9 +5,10 @@ import androidx.room.Query
 
 @Entity(tableName = "recipes")
 data class Recipe(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val title: String,
-    val summary: String
+    val instructions: String
 )
 
 @Dao

@@ -34,7 +34,6 @@
         android:text="@string/loginBtnText"
         android:textAllCaps="false"
         android:textSize="26sp"
-        android:textColor="@color/white"
         android:layout_marginTop="20dp"
         android:background="@drawable/button" />
 </LinearLayout>
